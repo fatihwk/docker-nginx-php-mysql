@@ -320,6 +320,11 @@ and
 mysql -u"$MYSQL_ROOT_USER" -p"$MYSQL_ROOT_PASSWORD"
 ```
 
+#### get mysql ip address 
+```sh 
+docker inspect <mysql container id> 
+```
+
 #### Creating a backup of all databases
 
 ```sh

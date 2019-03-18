@@ -67,6 +67,9 @@ mysql-dump:
 mysql-restore:
 	@docker exec -i $(shell docker-compose ps -q mysqldb) mysql -u"$(MYSQL_ROOT_USER)" -p"$(MYSQL_ROOT_PASSWORD)" < $(MYSQL_DUMPS_DIR)/db.sql 2>/dev/null
 
+mysql-addr:
+	@docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' mysql  
+
 phpmd:
 	@docker-compose exec -T php \
 	./app/vendor/bin/phpmd \
