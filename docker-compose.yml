@@ -5,11 +5,11 @@ services:
         volumes:
             - "./etc/nginx/default.conf:/etc/nginx/conf.d/default.conf"
             - "./etc/ssl:/etc/ssl"
-            - "./banker:/var/www/html"
+            - "./web/banker:/var/www/html"
             - "./etc/nginx/default.template.conf:/etc/nginx/conf.d/default.template"
         ports:
             - "8000:80"
-            - "3000:443"
+            - "8443:443"
         environment:
             - NGINX_HOST=${NGINX_HOST}
         command: /bin/sh -c "envsubst '$$NGINX_HOST' < /etc/nginx/conf.d/default.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
@@ -24,11 +24,36 @@ services:
         restart: always
         volumes:
             - "./etc/php/php.ini:/usr/local/etc/php/conf.d/php.ini"
-            - "./banker:/var/www/html"
+            - "./web/banker:/var/www/html"
+    admin:
+        image: nginx:alpine
+        volumes:
+            - "./etc/nginx/admin.conf:/etc/nginx/conf.d/default.conf"
+            - "./etc/ssl:/etc/ssl"
+            - "./web/admin:/var/www/html"
+            - "./etc/nginx/admin.template.conf:/etc/nginx/conf.d/default.template"
+        ports:
+            - "7000:88"
+            - "7443:443"
+        environment:
+            - NGINX_HOST=${NGINX_HOST}
+        command: /bin/sh -c "envsubst '$$NGINX_HOST' < /etc/nginx/conf.d/default.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
+        restart: always
+        depends_on:
+            - adminphp
+            - mysqldb
+        links:
+            - mysqldb
+    adminphp:
+        image: nanoninja/php-fpm:${PHP_VERSION}
+        restart: always
+        volumes:
+            - "./etc/php/php.ini:/usr/local/etc/php/conf.d/php.ini"
+            - "./web/admin:/var/www/html"
     composer:
         image: "composer"
         volumes:
-            - "./banker/app:/app"
+            - "./web/banker/app:/app"
         command: install
     dbman:
         image: adminer
